@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testify - AI MCQ Generator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries for PDF and DOCX reading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/mammoth@1.4.2/mammoth.browser.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>Testify</span>
+            </div>
+            <nav class="nav">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Upload Screen -->
+            <div id="uploadScreen">
+                <!-- Hero Section -->
+                <section class="hero">
+                    <h1>Transform Your Notes into Smart MCQs</h1>
+                    <p>Upload your study notes (TXT, PDF, DOCX) and let AI generate comprehensive multiple-choice questions instantly</p>
+                </section>
+
+                <!-- Upload Section -->
+                <section class="upload-section">
+                    <div class="upload-container">
+                        <h2>Upload Your Notes</h2>
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p class="upload-text">Drag and drop your notes here or click to browse</p>
+                            <p class="supported-formats">Supports: TXT, PDF, DOCX files</p>
+                            <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx" hidden>
+                            <button class="browse-btn" onclick="document.getElementById('fileInput').click()">
+                                Browse Files
+                            </button>
+                        </div>
+
+                        <!-- Text Area for Manual Input -->
+                        <div class="manual-input">
+                            <h3>Or paste your notes directly:</h3>
+                            <textarea 
+                                id="notesText" 
+                                placeholder="Paste your study notes here..."
+                                rows="10"
+                            ></textarea>
+                        </div>
+
+                        <!-- Configuration Options -->
+                        <div class="config-section">
+                            <div class="config-row">
+                                <label for="numQuestions">Number of Questions:</label>
+                                <select id="numQuestions">
+                                    <option value="5">5 Questions</option>
+                                    <option value="10" selected>10 Questions</option>
+                                    <option value="15">15 Questions</option>
+                                    <option value="20">20 Questions</option>
+                                </select>
+                            </div>
+
+                            <div class="config-row">
+                                <label for="difficulty">Difficulty Level:</label>
+                                <select id="difficulty">
+                                    <option value="easy">Easy</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="generate-btn" onclick="generateMCQs()">
+                            <i class="fas fa-magic"></i>
+                            Generate MCQs
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Guidelines Screen -->
+            <div id="guidelinesScreen" style="display: none;">
+                <section class="upload-section">
+                    <div class="upload-container">
+                        <h2>📋 Exam Guidelines</h2>
+                        <div style="text-align: left; margin: 2rem 0;">
+                            <h3 style="color: #667eea; margin-bottom: 1rem;">Before You Begin:</h3>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="padding: 10px 0; border-bottom: 1px solid #eee;">
+                                    <strong>🔒 Secure Environment:</strong> The exam will run in full-screen mode with security restrictions
+                                </li>
+                                <li style="padding: 10px 0; border-bottom: 1px solid #eee;">
+                                    <strong>⏱️ Time Tracking:</strong> Your time will be recorded from start to finish
+                                </li>
+                                <li style="padding: 10px 0; border-bottom: 1px solid #eee;">
+                                    <strong>🚫 No Cheating:</strong> Copy, paste, screenshots, and browser tools will be disabled
+                                </li>
+                                <li style="padding: 10px 0; border-bottom: 1px solid #eee;">
+                                    <strong>📝 Answer All Questions:</strong> Make sure to answer every question before submitting
+                                </li>
+                                <li style="padding: 10px 0; border-bottom: 1px solid #eee;">
+                                    <strong>⚠️ Exit Warning:</strong> Closing the exam will lose all progress
+                                </li>
+                            </ul>
+
+                            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
+                                <h4 style="color: #dc3545; margin-bottom: 1rem;">📊 Exam Details:</h4>
+                                <p><strong>Questions:</strong> <span id="examQuestionCount">10</span></p>
+                                <p><strong>Difficulty:</strong> <span id="examDifficulty">Medium</span></p>
+                                <p><strong>Format:</strong> Multiple Choice Questions</p>
+                            </div>
+
+                            <p style="text-align: center; font-size: 1.1rem; margin: 2rem 0; color: #666;">
+                                Ready to start your exam? Click the button below to enter full-screen mode.
+                            </p>
+                        </div>
+
+                        <button class="generate-btn" onclick="startExam()">
+                            <i class="fas fa-play"></i>
+                            Start Exam
+                        </button>
+
+                        <button class="browse-btn" onclick="goBackToUpload()" style="margin-top: 1rem; background: #6c757d;">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Upload
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Exam Screen -->
+            <div id="examScreen" style="display: none;">
+                <div class="upload-container" id="examContainer">
+                    <!-- Exam content will be injected here -->
+                </div>
+            </div>
+
+            <!-- Loading Section -->
+            <section class="loading-section" id="loadingSection" style="display: none;">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <p id="loadingText">AI is analyzing your notes and generating questions...</p>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy;  2025 Testify by PD. Powered by AI for Better Learning.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
