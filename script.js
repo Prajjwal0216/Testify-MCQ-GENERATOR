@@ -384,7 +384,7 @@ function generateExamHTML() {
         </div>
 
         <div class='security-notice'>
-            🔒 SECURE EXAM MODE: Copy, paste, print, screenshots, and developer tools are disabled
+            SECURE EXAM MODE: Copy, paste, print, screenshots, and developer tools are disabled
         </div>
 
         <form id='examForm'>
